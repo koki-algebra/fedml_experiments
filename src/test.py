@@ -1,19 +1,23 @@
+import torch
 import fedml
 
 from data.UCI import load_data
 
+class LogisticRegression(torch.nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(LogisticRegression, self).__init__()
+        self.linear = torch.nn.Linear(input_dim, output_dim)
+
+    def forward(self, x):
+        outputs = torch.sigmoid(self.linear(x))
+        return outputs
+
+
 if __name__ == "__main__":
     args = fedml.init()
+    device = fedml.device.get_device(args)
     dataset, class_num = load_data(args)
+    model = LogisticRegression(105, class_num)
 
-    train_data_num            = dataset[0]
-    test_data_num             = dataset[1]
-    train_data_global         = dataset[2]
-    test_data_global          = dataset[3]
-    train_data_local_num_dict = dataset[4]
-    train_data_local_dict     = dataset[5]
-    test_data_local_dict      = dataset[6]
-    class_num                 = dataset[7]
-
-    for batch, (X, y) in enumerate(test_data_local_dict[0]):
-        print(f"batch: {batch}, X: {X.size()}")
+    fedml_runner = fedml.FedMLRunner(args, device, dataset, model)
+    fedml_runner.run()

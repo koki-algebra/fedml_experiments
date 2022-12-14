@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
-from torch import Tensor, LongTensor, FloatTensor
+from torch import LongTensor, FloatTensor
 from torch.utils.data import Dataset, DataLoader
 import fedml
 from fedml.arguments import Arguments
@@ -100,13 +100,12 @@ def load_partition_data(args: Arguments) -> Tuple[int, int, int, list, list, dic
     train_unlabeled_dataset = UCIIncome(X=X_u_train)
     test_dataset            = UCIIncome(X=X_test, y=y_test)
 
-    client_number = args.client_num_in_total
+    client_number  = args.client_num_in_total
     train_data_num = len(X_l_train) + len(X_u_train)
-    test_data_num = len(X_test)
-    # Tensor is mini-batch
+    test_data_num  = len(X_test)
     train_data_global = DataLoader(dataset=train_labeled_dataset, batch_size=labeled_batch_size)
     test_data_global  = DataLoader(dataset=test_dataset, batch_size=labeled_batch_size)
-    train_data_local_num_dict = {}
+    train_data_local_num_dict: Dict[int, int] = {}
     train_data_local_dict: Dict[int, DataLoader] = {}
     test_data_local_dict : Dict[int, DataLoader] = {}
     class_num = 2
@@ -114,8 +113,6 @@ def load_partition_data(args: Arguments) -> Tuple[int, int, int, list, list, dic
     # create client local data
     client_train_data_num = math.floor(train_data_num / client_number)
     client_test_data_num  = math.floor(test_data_num  / client_number)
-    print(client_train_data_num)
-    print(client_test_data_num)
     for i in range(client_number):
         train_local_dataset = UCIIncome(
             X=X_l_train[i*client_train_data_num:(i+1)*client_train_data_num],
@@ -133,6 +130,8 @@ def load_partition_data(args: Arguments) -> Tuple[int, int, int, list, list, dic
             dataset=test_local_dataset,
             batch_size=labeled_batch_size
         )
+
+        train_data_local_num_dict[i] = client_train_data_num
 
     return (
         train_data_num,
