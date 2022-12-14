@@ -101,7 +101,7 @@ def load_partition_data(args: Arguments) -> Tuple[int, int, int, list, list, dic
     test_dataset            = UCIIncome(X=X_test, y=y_test)
 
     client_number  = args.client_num_in_total
-    train_data_num = len(X_l_train) + len(X_u_train)
+    train_data_num = len(X_l_train)
     test_data_num  = len(X_test)
     train_data_global = DataLoader(dataset=train_labeled_dataset, batch_size=labeled_batch_size)
     test_data_global  = DataLoader(dataset=test_dataset, batch_size=labeled_batch_size)
